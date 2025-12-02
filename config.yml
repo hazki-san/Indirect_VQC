@@ -1,0 +1,49 @@
+# System configuration
+nqubit: 4
+# State options: 'dmatrix' and 'statevector' ここ聞きたい
+state: "dmatrix"
+
+#VQC configuration
+vqc:
+  iteration: 1
+
+  #Optimization configuration
+  optimization:
+    status: True
+    algorithm: "SLSQP"
+    constraint: False
+
+  #circuit config
+  ansatz:
+    #'xy', 'ising', 'heisenberg'
+    type: "xy"
+    depth: 1
+    gateset: 1
+    ugate:
+      coefficient:
+        cn: []
+        bn: []
+        r: 0
+      time:
+        type: "random"
+        value: []
+        min: 0.0
+        max: 10.0
+    noise:
+      status: False
+      value: []
+
+    #'random' or List[float]
+    init_param: "random"
+
+
+#DBに出すやつ
+output:
+  project:
+    id: "honda-project"
+  bigquery:
+    import: False
+    dataset: job_results
+    table: vqc
+
+
