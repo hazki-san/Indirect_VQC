@@ -38,17 +38,18 @@ def ansatz_list(n_qubit: int, depth: int, params: list[float], ugateH: Observabl
         
         # CZ gate
         circuit.add_gate(CZ(0, 1))
-
-        if depth == 0:
+        """
+        if d == 0:#encodingの関係でいらないかも １こずつずれる
             t_before = 0
-            t_after = params[depth]
+            t_after = params[depth + d]
             time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
             circuit.add_gate(time_evo_gate)
         else:
-            t_before = param[depth]
-            t_after = params[depth + 1]
-            time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
-            circuit.add_gate(time_evo_gate)
+        """
+        t_before = param[depth + d]
+        t_after = params[depth + d + 1]
+        time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
+        circuit.add_gate(time_evo_gate)
 
         flag += 4 * gateset
 

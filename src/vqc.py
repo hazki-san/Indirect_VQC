@@ -16,11 +16,10 @@ class IndirectVQC:
     def __init__(
         self,
         nqubits: int,
-        state: str,
-        #observable: Observable,
-        optimization: Dict,
+        feature_map: Dict,
         ansatz: Dict,
-        identity_factor: List[int],
+        loss_fn: str,
+        optimization: Dict,
         init_param: Union[List[float], str],
     ) -> None:
 

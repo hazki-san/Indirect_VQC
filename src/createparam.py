@@ -16,12 +16,14 @@ def create_param(depth: int, gateset: int, t_init: float, t_final: float) -> np.
 
     Returns:
         numpy.ndarray: an nd:array
-            [t1, t2, ..., td, theta1, ..., theta(d*4*gateset)]
+            [t1, (for encoding)
+             t2, ..., td, t(d+1), (for vqc ansatz)
+             theta1, ..., theta(d*4*gateset)] (for vqc ansatz)
 
     """
     param = np.array([])
     #Time param
-    time = np.random.uniform(t_init, t_final, depth)
+    time = np.random.uniform(t_init, t_final, depth+1)
     time = np.sort(time)
     for i in time:
         param = np.append(param, i)

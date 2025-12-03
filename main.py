@@ -21,7 +21,7 @@ def load_config(config_file_path):
     return config
 
 #
-def initialize_vqc() -> None:
+def initialize_vqc(config) -> None:
 
     initial_cost_history = []
     min_cost_history = []
@@ -31,7 +31,8 @@ def initialize_vqc() -> None:
     #必要に応じて開始のステータスメッセージを表示
 
     start_time = time.time()
-    vqc_instance = IndirectVQC
+    
+    
 
 
 if __name__ == "__main__":
@@ -44,12 +45,8 @@ if __name__ == "__main__":
     config_file = sys.argv[1]
     config = load_config(config_file)
 
-    if config:
-        #operation: str = config["run"]      #VQCしかしないので要らないかも
-        nqubits: int = config["nqubits"]
-        state: str = config["state"]
-
-        #observable: Dict = config["observable"] #いらないと思う 多分ここはVQEのObservable
-        #arijitさんのところのObservable項は飛ばす
+    #DBに色々する処理を追加する　阿南さんの参照
+    for k in range(config["vqc"]["iteration"]):
+        initialize_vqc(config)
 
         

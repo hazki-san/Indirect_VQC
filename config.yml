@@ -36,6 +36,12 @@ vqc:
     #'random' or List[float]
     init_param: "random"
 
+  #dataset configuration
+  Dataset:
+    training_num: 10
+    test_num: 5
+    feature_num: 4
+
 
 #DBに出すやつ
 output:
