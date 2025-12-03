@@ -1,0 +1,43 @@
+import numpy as np
+
+from typing import List
+
+from qulacs import QuantumCircuit
+from qulacs.gate import CZ, RX, RY, RZ, Identity, Y, merge
+
+def encode(n_qubit: int, feature: list[float], params: list[float], depth: int) -> QuantumCircuit:
+    """
+    VQC encoding circuit after encoding part
+   
+    Args:
+        n_qubit (int): number of qubits
+        feature (ndarray): Initial params for rotation gates and time evolusion gate:[t1, t2, ..., td, theta1, ..., theta(d*4)]
+        params (ndarray): 一番初めの時間が欲しい
+        depth (int): paramsから指定の時間を引っ張ってくる用
+    Returns:
+        QuantumCircuit
+
+    今のところXYモデルしか対応してない
+
+    """
+
+    circuit = QuantumCircuit(n_qubit)
+
+    angle_1 = np.arcsin(feature[0])
+    angle_2 = np.arcsin(feature[1])
+    angle_3 = np.arcsin(feature[2])
+    angle_4 = np.arcsin(feature[3])
+    
+    circuit.add_gate(RX(0, angle_1))
+    circuit.add_gate(RX(1, angle_2))
+    circuit.add_gate(RY(0, angle_3))
+    circuit.add_gate(RY(1, angle_4))
+    circuit.add_gate(CZ(0, 1))
+
+    #time evolusion
+    t_before = 0
+    t_after = params[depth]
+    time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
+    circuit.add_gate(time_evo_gate)
+
+    return circuit
