@@ -18,19 +18,25 @@ class IndirectVQC:
     def __init__(
         self,
         nqubits: int,
-        feature_map: Dict,
-        ansatz: Dict,
-        loss_fn: str,
         optimization: Dict,
         init_param: Union[List[float], str],
     ) -> None:
+        """
+        Args:
+            nqubits: number of qubits
+            optimization: 
+            init_param[]:
 
+            必要に応じてansatz入れたり
+        """    
         self.nqubits = nqubits
-        self.state = state
 
         # Optimization variables
         self.optimization_status: bool = optimization["status"]
+        self.optimizar: str = optimization["algorithm"]
+        self.constraints: bool = optimization["constraints"]
 
+        self.init_param = init_param
         
         self.circuit = None
     
@@ -76,3 +82,27 @@ class IndirectVQC:
         cost = cost / num
 
         return cost
+
+
+    def run_optimization():
+        
+        cost_history = []
+        min_cost = None
+        optimized_parms = None
+
+        opt = minimize(
+            self.cost_function,#検討
+            parameters,
+            method = self.optimizar,
+            constraints = self.constraints,
+            callback=lambda x: cost_history.append(self.cost_function(x)),
+        )
+
+        min_cost = np.min(cost_history)
+        optimized_parms = opt.x.tolist()
+
+        return min_cost, optimized_parms
+    
+    def run_vqc():
+
+        return None
