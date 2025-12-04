@@ -29,7 +29,7 @@ def ansatz_list(n_qubit: int, depth: int, params: list[float], ugateH: Observabl
 
     for d in range(depth):
 
-        for i in range(gateset):
+        for i in range(gateset): #通常1回しか回さないと思う
             # Rotation gate
             circuit.add_gate(RX(0, params[flag + i]))
             circuit.add_gate(RX(1, params[flag + i + 1]))
