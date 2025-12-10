@@ -38,6 +38,7 @@ vqc:
 
   #dataset configuration
   Dataset:
+    path: ""
     training_num: 10
     test_num: 5
     feature_num: 4
