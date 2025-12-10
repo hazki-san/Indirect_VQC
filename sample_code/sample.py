@@ -158,7 +158,7 @@ def cost_func(theta):
     theta: 長さc_depth * nqubit * 3のndarray
     '''
     # U_outのパラメータthetaを更新
-#     global U_out
+    #global U_out
     set_U_out(theta)
 
     # num_x_train個のデータについて計算
