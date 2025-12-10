@@ -31,7 +31,14 @@ def initialize_vqc(config) -> None:
     #必要に応じて開始のステータスメッセージを表示
 
     start_time = time.time()
-    
+    vqc_instance = IndirectVQC(
+
+    )
+    vqc_output = vqc_instance.run_vqc()
+    end_time = time.time()
+
+    run_time = end_time - start_time
+    print(f"VQC done with time taken: {run_time} sec.")
     
 
 
