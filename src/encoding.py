@@ -5,12 +5,12 @@ from typing import List
 from qulacs import QuantumCircuit
 from qulacs.gate import CZ, RX, RY, RZ, Identity, Y, merge
 
-def encode(n_qubit: int, feature: list[float], param: list[float], depth: int) -> QuantumCircuit:
+def encode(nqubit: int, feature: list[float], param: list[float], depth: int) -> QuantumCircuit:
     """
     VQC encoding circuit after encoding part
    
     Args:
-        n_qubit (int): number of qubits
+        nqubit (int): number of qubits
         feature (ndarray): Initial params for rotation gates and time evolusion gate:[t1, t2, ..., td, theta1, ..., theta(d*4)]
         param (ndarray): 一番初めの時間が欲しい
         depth (int): paramsから指定の時間を引っ張ってくる用
@@ -21,7 +21,7 @@ def encode(n_qubit: int, feature: list[float], param: list[float], depth: int) -
 
     """
 
-    circuit = QuantumCircuit(n_qubit)
+    circuit = QuantumCircuit(nqubit)
 
     angle_1 = np.arcsin(feature[0])
     angle_2 = np.arcsin(feature[1])

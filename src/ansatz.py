@@ -5,12 +5,12 @@ from qulacs.gate import CZ, RX, RY, RZ, Identity, Y, merge
 
 from .time_evolusion_gate import create_time_evo_unitary
 
-def ansatz_list(n_qubit: int, depth: int, param: list[float], ugateH: Observable, gateset: int) -> QuantumCircuit:
+def ansatz_list(nqubit: int, depth: int, param: list[float], ugateH: Observable, gateset: int) -> QuantumCircuit:
     """
     VQC ansatz circuit after encoding part
    
     Args:
-        n_qubit (int): number of qubits
+        nqubit (int): number of qubits
         depth (int): depth of ansatz circuit
         param (ndarray): Initial params for rotation gates and time evolusion gate:[t1, t2, ..., td, theta1, ..., theta(d*4)]
         ugateH (Observable): `qulacs_core.Observable`, Hamiltonian used in time evolusion gate i.e. exp(-iHt)
@@ -23,7 +23,7 @@ def ansatz_list(n_qubit: int, depth: int, param: list[float], ugateH: Observable
 
     """
 
-    circuit = QuantumCircuit(n_qubit)
+    circuit = QuantumCircuit(nqubit)
     
     flag = depth # Tracking angles in params
 
