@@ -9,6 +9,8 @@ from typing import List, Union
 
 import yaml
 
+from src.vqc import IndirectVQC
+
 symbol_count = 10
 
 #configファイル読み込む
@@ -61,14 +63,14 @@ def initialize_vqc() -> None:
         min_cost_history.append(min_cost)
         all_optimized_param.append(optimized_param)
 
-        time_evolution_hamiltonian_string.append(str(vqe_instance.get_ugate_hamiltonain()))
+        #time_evolution_hamiltonian_string.append(str(vqe_instance.get_ugate_hamiltonain()))
 
     end_time = time.time()
     total_run_time = end_time - start_time
 
     print("=" * symbol_count + "Output" + "=" * symbol_count)
 
-    print(f"Initial costs: {initial_costs_history}")
+    print(f"Initial costs: {initial_cost_history}")
     print(f"Optimized minimum costs: {min_cost_history}")
     print(f"Optimized parameters: {all_optimized_param}")
     print(f"Run time: {total_run_time} sec")
@@ -86,7 +88,8 @@ if __name__ == "__main__":
     config_file = sys.argv[1]
     config = load_config(config_file)
 
-    is_valid_config: bool = validate_yml_config(config)
+    #is_valid_config: bool = validate_yml_config(config) #このモジュール作ってないのであとで追加
+    is_valid_config: bool = True
 
     if config and is_valid_config:
         nqubit: int = config["nqubit"]
