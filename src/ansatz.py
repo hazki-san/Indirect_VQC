@@ -25,7 +25,7 @@ def ansatz_list(nqubit: int, depth: int, param: list[float], ugateH: Observable,
 
     circuit = QuantumCircuit(nqubit)
     
-    flag = depth # Tracking angles in params
+    flag = depth+1 # Tracking angles in params
 
     for d in range(depth):
 
