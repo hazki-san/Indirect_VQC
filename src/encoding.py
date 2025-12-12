@@ -5,7 +5,7 @@ from typing import List
 from qulacs import QuantumCircuit
 from qulacs.gate import CZ, RX, RY, RZ, Identity, Y, merge
 
-def encode(nqubit: int, feature: list[float], param: list[float], depth: int) -> QuantumCircuit:
+def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ugateH: Observable) -> QuantumCircuit:
     """
     VQC encoding circuit after encoding part
    
@@ -36,7 +36,8 @@ def encode(nqubit: int, feature: list[float], param: list[float], depth: int) ->
 
     #time evolusion
     t_before = 0
-    t_after = param[depth]
+    t_after = param[0]
+    #t_after = param[depth]
     time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
     circuit.add_gate(time_evo_gate)
 
