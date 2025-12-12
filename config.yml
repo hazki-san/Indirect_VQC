@@ -40,13 +40,13 @@ vqc:
   Dataset:
     feature_num: 4
     train:
-      path: "\dataset\iris_processed_train.data"
+      path: "/dataset/iris_processed_train.data"
       num: 80
     test1:
-      path: "\dataset\iris_processed_test1.data"
+      path: "/dataset/iris_processed_test1.data"
       num: 5
     test2:
-      path: "\dataset\iris_processed_test2.data"
+      path: "/dataset/iris_processed_test2.data"
       num: 5
 
 
