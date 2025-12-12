@@ -39,7 +39,7 @@ class IndirectVQC:
         # Optimization variables
         self.optimization_status: bool = optimization["status"]
         self.optimizar: str = optimization["algorithm"]
-        self.constraints: bool = optimization["constraints"]
+        self.constraints: bool = optimization["constraint"]
 
         # Ansatz variables
         self.ansatz_type: int = ansatz["type"]
@@ -67,7 +67,9 @@ class IndirectVQC:
         #open data file
         self.train_feature = np.loadtxt(self.train_data_path, delimiter=',')
         self.test_feature = np.loadtxt(self.test_data_path, delimiter=',')
-    
+        #特徴を0~2πに正規化するように encodingの内側でも可
+
+
     def create_circuit(self, param, feature):
 
         """

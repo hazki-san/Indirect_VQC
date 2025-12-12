@@ -1,4 +1,4 @@
-import numpy as numpy
+import numpy as np
 
 def create_param(depth: int, gateset: int, t_init: float, t_final: float) -> np.ndarray:
 
@@ -35,3 +35,5 @@ def create_param(depth: int, gateset: int, t_init: float, t_final: float) -> np.
         param = np.append(param, i)
 
     return param
+
+    
