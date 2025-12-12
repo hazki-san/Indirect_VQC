@@ -4,6 +4,7 @@ from typing import Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from qulacs import DensityMatrix, Observable, QuantumCircuit, QuantumState
 from qulacsvis import circuit_drawer
 from scipy.optimize import minimize
@@ -29,7 +30,8 @@ class IndirectVQC:
                 ansatz: ansatz関係のもの
                 optimization: status, algorithm and constraints
                 init_param[]:空の場合はcreateparamで適当に作る
-
+                optimization:
+                dataset:
 
         """    
         self.nqubit = nqubit
@@ -53,24 +55,35 @@ class IndirectVQC:
         
         self.circuit = None
 
+        self.ugate_hami = create_xy_hamiltonian(self.nqubit, self.ansatz_cn, self.ansatz_bn, self.ansatz_r)
+        
         #about trainig data
+        self.train_data_path :str = dataset["train"]["path"]
+        self.train_num :int = dataset["train"]["num"]
+        self.test_data_path :str = dataset["test1"]["path"]
+        self.test_num :int = dataset["test1"]["num"]
+        self.feature_num :int = dataset["feature_num"]
+
+        #open data file
+        self.train_feature = np.loadtxt(self.train_data_path, delimiter=',')
+        self.test_feature = np.loadtxt(self.test_data_path, delimiter=',')
     
-    def create_circuit(self, param):
+    def create_circuit(self, param, feature):
 
         """
             encodingとansatzのところの回路を合体させる
         """
         encoding_circuit = encode(
-            n_qubit = self.nqubit,
-            feature = self.feature,
-            param = self.param,
+            nqubit = self.nqubit,
+            feature = feature,##self.featureじゃなくてその中の要素を引数で入れた方がいいかも
+            param = param,
             depth = self.depth,
         )
         ansatz_circuit = ansatz_list(
-            n_qubit = self.nqubit,
+            nqubit = self.nqubit,
             depth = self.depth,
             param = param,
-            ugateH = self.ugateH,
+            ugateH = self.ugate_hami,
             gateset = self.gateset,
         )
         circuit = encoding_circuit
@@ -78,18 +91,23 @@ class IndirectVQC:
 
         return self.circuit
 
+    #def set_U_out(param):
+        
+
     def loss_func(param): #theta param
         
-        #theta更新を一行入れる
+        #theta更新を一行入れる?
 
         y_pred = []
-        for i in range(train_Data):
+        y_train = self.train_feature[:,self.feature_num]
+
+        for i in range(self.train_num):
             state = QuantumState(n_qubit)
             state.set_zero_state()
 
             #入力状態計算、出力状態計算
             #create_circuitに引数でtheta渡さないといけない気がとてもする
-            create_circuit(param).update_quantum_state(state)
+            create_circuit(param, train_feature[i]).update_quantum_state(state)
 
             #モデルの出力(Z)
             obs = Observable(nqubit)
@@ -119,7 +137,7 @@ class IndirectVQC:
         #constraintsの確認
 
         #最適化実行
-        vqc_result = minimize(
+        opt = minimize(
             loss_func, 
             init_param,
             method = self.optimizar,
@@ -128,6 +146,12 @@ class IndirectVQC:
         )
 
         min_cost = np.min(cost_history)
-        optimized_parms = opt.x.tolist()
+        optimized_param = opt.x.tolist()
+
+        vqc_result: Dict = {
+            "initial_cost": initial_cost,
+            "min_cost": min_cost,
+            "optimized_param": optimized_param
+        }
 
         return vqc_result
