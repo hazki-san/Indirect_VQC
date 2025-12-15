@@ -121,7 +121,7 @@ class IndirectVQC:
             y_pred.append(obs.get_expectation_value(state))
             #debug
             print(f"  #y_{i}_pred: {obs.get_expectation_value(state)}")
-                    
+
         loss = ((y_pred - y_train)**2).mean()
 
         return loss
@@ -153,7 +153,7 @@ class IndirectVQC:
             fun=self.loss_func, 
             x0=init_param,
             method = self.optimizar,
-            constraints = self.constraints,
+            #constraints = self.constraints,
             callback=lambda x: cost_history.append(self.loss_func(x)),
         )
 
