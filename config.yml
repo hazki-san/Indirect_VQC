@@ -1,3 +1,9 @@
+#select mode 
+# vqc :run vqc optimize step 
+# debug : culcualte initial loss_func 今のところ
+# test : test vqc circuit with optimized parameters 未実装
+mode: "debug"
+
 # System configuration
 nqubit: 4
 # State options: 'dmatrix' and 'statevector' ここ聞きたい
