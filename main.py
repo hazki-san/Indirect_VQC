@@ -98,6 +98,7 @@ if __name__ == "__main__":
         ansatz: Dict = config["vqc"]["ansatz"]
         dataset: Dict = config["vqc"]["Dataset"]
         initialparam: Union[str, List[float]] = ansatz["init_param"]
+        runmode :str = config["mode"]
 
     initialize_vqc()
 
