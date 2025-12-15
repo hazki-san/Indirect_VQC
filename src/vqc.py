@@ -80,42 +80,48 @@ class IndirectVQC:
             feature = feature,##self.featureじゃなくてその中の要素を引数で入れた方がいいかも
             param = param,
             depth = self.depth,
+            ugateH=self.ugate_hami,
         )
         ansatz_circuit = ansatz_list(
             nqubit = self.nqubit,
             depth = self.depth,
             param = param,
             ugateH = self.ugate_hami,
-            gateset = self.gateset,
+            gateset = self.ansatz_gateset,
         )
         circuit = encoding_circuit
         circuit.merge_circuit(ansatz_circuit)
 
-        return self.circuit
+        return circuit
 
     #def set_U_out(param):
         
 
-    def loss_func(param): #theta param
+    def loss_func(self, param): #theta param
         
         #theta更新を一行入れる?
 
         y_pred = []
         y_train = self.train_feature[:,self.feature_num]
 
+        #for debug
+        print(f"y_train is [{y_train}]" )
+
         for i in range(self.train_num):
-            state = QuantumState(n_qubit)
+            state = QuantumState(self.nqubit)
             state.set_zero_state()
 
             #入力状態計算、出力状態計算
             #create_circuitに引数でtheta渡さないといけない気がとてもする
-            create_circuit(param, train_feature[i]).update_quantum_state(state)
+            self.create_circuit(param, self.train_feature[i]).update_quantum_state(state)
 
             #モデルの出力(Z)
-            obs = Observable(nqubit)
+            obs = Observable(self.nqubit)
             obs.add_operator(2.,'Z 0')
-            y_pred[i] = obs.get_expectation_value(state)
-        
+            y_pred.append(obs.get_expectation_value(state))
+            #debug
+            print(f"  #y_{i}_pred: {obs.get_expectation_value(state)}")
+                    
         loss = ((y_pred - y_train)**2).mean()
 
         return loss
@@ -129,6 +135,10 @@ class IndirectVQC:
             t_init = self.ansatz_t_min, 
             t_final=self.ansatz_t_max,
         )
+        #for debug
+        print(init_param)
+
+
         #初期(ランダム)パラメータでのコスト関数の値
         initial_cost = self.loss_func(init_param)
 
@@ -140,8 +150,8 @@ class IndirectVQC:
 
         #最適化実行
         opt = minimize(
-            loss_func, 
-            init_param,
+            fun=self.loss_func, 
+            x0=init_param,
             method = self.optimizar,
             constraints = self.constraints,
             callback=lambda x: cost_history.append(self.loss_func(x)),
