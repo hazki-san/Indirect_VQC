@@ -2,8 +2,10 @@ import numpy as np
 
 from typing import List
 
-from qulacs import QuantumCircuit
+from qulacs import QuantumCircuit, Observable
 from qulacs.gate import CZ, RX, RY, RZ, Identity, Y, merge
+
+from src.time_evolusion_gate import create_time_evo_unitary
 
 def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ugateH: Observable) -> QuantumCircuit:
     """
