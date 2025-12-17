@@ -25,14 +25,17 @@ def create_param(depth: int, gateset: int, t_init: float, t_final: float) -> np.
     #Time param
     time = np.random.uniform(t_init, t_final, depth+1)
     time = np.sort(time)
-    for i in time:
-        param = np.append(param, i)
+    param = np.append(param, time)
+    #for i in time:
+    #    param = np.append(param, i)
+    #    #print(f"   t_{i}: {}")
 
     #Theta param
     theta = np.random.random(depth * gateset * 4) * 1e-1
-    #1e-1が何してるのか調べること
-    for i in theta:
-        param = np.append(param, i)
+    param = np.append(param, theta)
+
+    #for i in theta:
+    #    param = np.append(param, i)
 
     return param
 
