@@ -13,6 +13,7 @@ from src.createparam import create_param
 from src.hamiltonian import create_xy_hamiltonian
 from src.encoding import encode
 from src.ansatz import ansatz_list
+from src.constraint import create_time_constraints
 
 #count iteration
 count_itr = 0
@@ -32,7 +33,7 @@ class IndirectVQC:
             Args:
                 nqubit: number of qubits
                 ansatz: ansatz関係のもの
-                optimization: status, algorithm and constraints
+                optimization: status, algorithm and constraint
                 init_param[]:空の場合はcreateparamで適当に作る
                 optimization:
                 dataset:
@@ -43,7 +44,7 @@ class IndirectVQC:
         # Optimization variables
         self.optimization_status: bool = optimization["status"]
         self.optimizar: str = optimization["algorithm"]
-        self.constraints: bool = optimization["constraint"]
+        self.constraint: bool = optimization["constraint"]
 
         # Ansatz variables
         self.ansatz_type: int = ansatz["type"]
@@ -137,6 +138,12 @@ class IndirectVQC:
         global y_train
         y_train = self.train_feature[:,self.feature_num]
 
+        cost_history = []
+        min_cost = None
+        optimized_parms = None
+        vqc_constraint = None
+        initial_cost: float = None
+
         #for debug
         print(f"y_train  {y_train}" )
 
@@ -153,18 +160,16 @@ class IndirectVQC:
         #初期(ランダム)パラメータでのコスト関数の値
         initial_cost = self.loss_func(init_param)
 
-        cost_history = []
-        min_cost = None
-        optimized_parms = None
-
-        #constraintsの確認
+        #constraintの確認
+        if self.constraint and self.optimizar == "SLSQP":
+            vqc_constraint = create_time_constraints(self.depth+1, self.depth*5+1)
 
         #最適化実行
         opt = minimize(
             fun=self.loss_func, 
             x0=init_param,
             method = self.optimizar,
-            #constraints = self.constraints,
+            constraints = vqc_constraint,
             callback=lambda x: cost_history.append(self.loss_func(x)),
         )
 
