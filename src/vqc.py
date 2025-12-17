@@ -14,6 +14,10 @@ from src.hamiltonian import create_xy_hamiltonian
 from src.encoding import encode
 from src.ansatz import ansatz_list
 
+#count iteration
+count_itr = 0
+y_train = []
+
 class IndirectVQC:
 
     def __init__(
@@ -102,10 +106,6 @@ class IndirectVQC:
         #theta更新を一行入れる?
 
         y_pred = []
-        y_train = self.train_feature[:,self.feature_num]
-
-        #for debug
-        print(f"y_train is [{y_train}]" )
 
         for i in range(self.train_num):
             state = QuantumState(self.nqubit)
@@ -119,14 +119,26 @@ class IndirectVQC:
             obs = Observable(self.nqubit)
             obs.add_operator(2.,'Z 0')
             y_pred.append(obs.get_expectation_value(state))
-            #debug
-            print(f"  #y_{i}_pred: {obs.get_expectation_value(state)}")
+
+        #debug
+        global count_itr
+        if(count_itr % 100 == 0): 
+            print(f"#{count_itr}  y_pred: {y_pred}")
+            print(f"#{count_itr}   param: {param}")
+            print(f"--------------------------------------------")
+        count_itr += 1
 
         loss = ((y_pred - y_train)**2).mean()
 
         return loss
  
     def run_vqc(self):
+
+        global y_train
+        y_train = self.train_feature[:,self.feature_num]
+
+        #for debug
+        print(f"y_train  {y_train}" )
 
         #もしinit_paramが空かrandomにしろという感じだったら
         init_param = create_param(
@@ -137,7 +149,6 @@ class IndirectVQC:
         )
         #for debug
         print(init_param)
-
 
         #初期(ランダム)パラメータでのコスト関数の値
         initial_cost = self.loss_func(init_param)
@@ -164,6 +175,43 @@ class IndirectVQC:
             "initial_cost": initial_cost,
             "min_cost": min_cost,
             "optimized_param": optimized_param
+        }
+
+        return vqc_result
+
+    def debug(self):
+
+        global y_train
+        y_train = self.train_feature[:,self.feature_num]
+
+        #for debug
+        print(f"y_train  {y_train}" )
+
+        #もしinit_paramが空かrandomにしろという感じだったら
+        init_param = create_param(
+            depth=self.depth, 
+            gateset = self.ansatz_gateset, 
+            t_init = self.ansatz_t_min, 
+            t_final=self.ansatz_t_max,
+        )
+        #for debug
+        print(f"init_param  {init_param}" )
+
+
+        #初期(ランダム)パラメータでのコスト関数の値
+        initial_cost = self.loss_func(init_param)
+
+        min_cost = None
+
+        #constraintsの確認
+
+        #最適化実行
+
+
+        vqc_result: Dict = {
+            "initial_cost": initial_cost,
+            "min_cost": min_cost,
+            "optimized_param": None
         }
 
         return vqc_result
