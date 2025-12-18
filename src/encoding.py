@@ -25,10 +25,10 @@ def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ug
 
     circuit = QuantumCircuit(nqubit)
 
-    angle_1 = np.arcsin(feature[0])
-    angle_2 = np.arcsin(feature[1])
-    angle_3 = np.arcsin(feature[2])
-    angle_4 = np.arcsin(feature[3])
+    #angle_1 = np.arcsin(feature[0])
+    #angle_2 = np.arcsin(feature[1])
+    #angle_3 = np.arcsin(feature[2])
+    #angle_4 = np.arcsin(feature[3])
     
     circuit.add_gate(RX(0, angle_1))
     circuit.add_gate(RX(1, angle_2))
