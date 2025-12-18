@@ -98,6 +98,8 @@ class IndirectVQC:
             depth = self.depth,
             ugateH=self.ugate_hami,
         )
+        #ランダムなansatzを入れる 何層か
+
         ansatz_circuit = ansatz_list(
             nqubit = self.nqubit,
             depth = self.depth,
