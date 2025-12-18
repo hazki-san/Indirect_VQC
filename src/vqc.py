@@ -70,9 +70,20 @@ class IndirectVQC:
         self.feature_num :int = dataset["feature_num"]
 
         #open data file
-        self.train_feature = np.loadtxt(self.train_data_path, delimiter=',')
-        self.test_feature = np.loadtxt(self.test_data_path, delimiter=',')
+        #self.train_feature = np.loadtxt(self.train_data_path, delimiter=',')
+        #self.test_feature = np.loadtxt(self.test_data_path, delimiter=',')
         #特徴を0~2πに正規化するように encodingの内側でも可
+        self.train_feature = pd.read_csv(train_data_path, header=None)
+        features = self.train_feature.iloc[:, 0:3] #irisは1~4列目が特徴量、5列目がラベル
+        min_values = features.min()
+        max_values = features.max()
+        #正規化
+        normalized_features = ((features - min_values) / (max_values - min_values)) * (2 * np.pi)
+        self.train_feature.iloc[0:3] = normalized_features
+
+        #debug
+        print(self.train_feature.head())
+
 
 
     def create_circuit(self, param, feature):
