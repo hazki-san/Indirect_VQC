@@ -71,7 +71,7 @@ class IndirectVQC:
         self.encode_type :int = dataset["encode_type"]
 
         #open data file
-        self.train_feature = pd.read_csv(train_data_path, header=None)
+        self.train_feature = pd.read_csv(self.train_data_path, header=None)
         features = self.train_feature.iloc[:, 0:self.feature_num] #irisは1~4列目が特徴量、5列目がラベル
         min_values = features.min()
         max_values = features.max()
