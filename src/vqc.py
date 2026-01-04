@@ -68,18 +68,16 @@ class IndirectVQC:
         self.test_data_path :str = dataset["test1"]["path"]
         self.test_num :int = dataset["test1"]["num"]
         self.feature_num :int = dataset["feature_num"]
+        self.encode_type :int = dataset["encode_type"]
 
         #open data file
-        #self.train_feature = np.loadtxt(self.train_data_path, delimiter=',')
-        #self.test_feature = np.loadtxt(self.test_data_path, delimiter=',')
-        #特徴を0~2πに正規化するように encodingの内側でも可
         self.train_feature = pd.read_csv(train_data_path, header=None)
-        features = self.train_feature.iloc[:, 0:3] #irisは1~4列目が特徴量、5列目がラベル
+        features = self.train_feature.iloc[:, 0:self.feature_num] #irisは1~4列目が特徴量、5列目がラベル
         min_values = features.min()
         max_values = features.max()
         #正規化
         normalized_features = ((features - min_values) / (max_values - min_values)) * (2 * np.pi)
-        self.train_feature.iloc[0:3] = normalized_features
+        self.train_feature.iloc[0:4] = normalized_features
 
         #debug
         print(self.train_feature.head())
@@ -93,7 +91,7 @@ class IndirectVQC:
         """
         encoding_circuit = encode(
             nqubit = self.nqubit,
-            feature = feature,##self.featureじゃなくてその中の要素を引数で入れた方がいいかも
+            feature = feature,
             param = param,
             depth = self.depth,
             ugateH=self.ugate_hami,
@@ -112,9 +110,6 @@ class IndirectVQC:
 
         return circuit
 
-    #def set_U_out(param):
-        
-
     def loss_func(self, param): #theta param
         
         #theta更新を一行入れる?
@@ -126,12 +121,11 @@ class IndirectVQC:
             state.set_zero_state()
 
             #入力状態計算、出力状態計算
-            #create_circuitに引数でtheta渡さないといけない気がとてもする
-            self.create_circuit(param, self.train_feature[i]).update_quantum_state(state)
+            self.create_circuit(param, self.train_feature.iloc[i, 0:self.feature_num]).update_quantum_state(state)
 
             #モデルの出力(Z)
             obs = Observable(self.nqubit)
-            obs.add_operator(2.,'Z 0')
+            obs.add_operator(1.,'Z 0')
             y_pred.append(obs.get_expectation_value(state))
 
         #debug
@@ -149,7 +143,7 @@ class IndirectVQC:
     def run_vqc(self):
 
         global y_train
-        y_train = self.train_feature[:,self.feature_num]
+        y_train = self.train_feature.iloc[:,self.feature_num]
 
         cost_history = []
         min_cost = None
@@ -166,6 +160,8 @@ class IndirectVQC:
             gateset = self.ansatz_gateset, 
             t_init = self.ansatz_t_min, 
             t_final=self.ansatz_t_max,
+            encode_type=self.encode_type,
+            feature_num=self.feature_num,
         )
         #for debug
         print(init_param)
@@ -174,8 +170,13 @@ class IndirectVQC:
         initial_cost = self.loss_func(init_param)
 
         #constraintの確認
+        if self.encode_type == 1:
+            t_num_en = self.feature_num
+        else:
+            t_num_en = 1
+
         if self.constraint and self.optimizar == "SLSQP":
-            vqc_constraint = create_time_constraints(self.depth+1, self.depth*5+1)
+            vqc_constraint = create_time_constraints(self.depth+t_num_en, self.depth*5+t_num_en)
 
         #最適化実行
         opt = minimize(
