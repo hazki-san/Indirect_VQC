@@ -48,7 +48,10 @@ def initialize_vqc() -> None:
             optimization = optimization,
             dataset = dataset,
         )
-        vqc_output = vqc_instance.run_vqc()
+        if runmode == "vqc":
+            vqc_output = vqc_instance.run_vqc()
+        elif runmode == "debug":
+            vqc_output = vqc_instance.debug()
         each_end_time = time.time()
 
         each_run_time = each_end_time - each_start_time
