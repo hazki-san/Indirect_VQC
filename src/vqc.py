@@ -77,7 +77,7 @@ class IndirectVQC:
         max_values = features.max()
         #正規化
         normalized_features = ((features - min_values) / (max_values - min_values)) * (2 * np.pi)
-        self.train_feature.iloc[0:4] = normalized_features
+        self.train_feature.iloc[:, 0:feature_num] = normalized_features
 
         #debug
         print(self.train_feature.head())
@@ -95,6 +95,8 @@ class IndirectVQC:
             param = param,
             depth = self.depth,
             ugateH=self.ugate_hami,
+            encode_type=self.encode_type,
+            feature_num=self.feature_num,
         )
         #ランダムなansatzを入れる 何層か
 
@@ -104,6 +106,9 @@ class IndirectVQC:
             param = param,
             ugateH = self.ugate_hami,
             gateset = self.ansatz_gateset,
+            encode_type=self.encode_type,
+            feature_num=self.feature_num,
+
         )
         circuit = encoding_circuit
         circuit.merge_circuit(ansatz_circuit)
@@ -131,7 +136,7 @@ class IndirectVQC:
         #debug
         global count_itr
         if(count_itr % 100 == 0): 
-            print(f"#{count_itr}  y_pred: {y_pred}")
+            #print(f"#{count_itr}  y_pred: {y_pred}")
             print(f"#{count_itr}   param: {param}")
             print(f"--------------------------------------------")
         count_itr += 1
@@ -178,11 +183,14 @@ class IndirectVQC:
         if self.constraint and self.optimizar == "SLSQP":
             vqc_constraint = create_time_constraints(self.depth+t_num_en, self.depth*5+t_num_en)
 
+        bounds = [(0, 2*np.pi)] * len(init_param)
+
         #最適化実行
         opt = minimize(
             fun=self.loss_func, 
             x0=init_param,
             method = self.optimizar,
+            bounds = bounds,
             constraints = vqc_constraint,
             callback=lambda x: cost_history.append(self.loss_func(x)),
         )
@@ -201,7 +209,13 @@ class IndirectVQC:
     def debug(self):
 
         global y_train
-        y_train = self.train_feature[:,self.feature_num]
+        y_train = self.train_feature.iloc[:,self.feature_num]
+
+        cost_history = []
+        min_cost = None
+        optimized_parms = None
+        vqc_constraint = None
+        initial_cost: float = None
 
         #for debug
         print(f"y_train  {y_train}" )
@@ -214,6 +228,7 @@ class IndirectVQC:
             t_final=self.ansatz_t_max,
         )
         #for debug
+        
         print(f"init_param  {init_param}" )
 
 
