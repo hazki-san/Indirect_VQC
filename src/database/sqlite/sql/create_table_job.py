@@ -17,6 +17,7 @@ def sql_for_create_table() -> str:
       iteration_history TEXT,
       actual_labels TEXT,
       estimated_labels TEXT,
+      estimated_labels_history TEXT,
       config TEXT
     )
     """

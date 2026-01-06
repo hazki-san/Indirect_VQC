@@ -33,6 +33,7 @@ def insert_job(client: DBClient, job: Job):
             job.iteration_history,
             job.actual_labels,
             job.estimated_labels,
+            job.estimated_labels_history,
             job.config,
         ),
     )

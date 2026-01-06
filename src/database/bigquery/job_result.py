@@ -27,6 +27,7 @@ def create_job_result_table(client: BigQueryClient, dataset: str, table_name: st
         bigquery.SchemaField("iteration_history", "STRING"),
         bigquery.SchemaField("actual_labels", "STRING"),
         bigquery.SchemaField("estimated_labels", "STRING"),
+        bigquery.SchemaField("estimated_labels_history", "STRING"),
         bigquery.SchemaField("config", "STRING"),
     ]
     table = client.create_table(dataset, table_name, schema)

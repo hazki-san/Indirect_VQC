@@ -22,6 +22,7 @@ class Job:
     iteration_history: str
     actual_labels: str
     estimated_labels: str
+    estimated_labels_history: str
     config: str
 
 
@@ -50,7 +51,7 @@ class JobFactory:
         param_history: list[float],
         iter_history: list[int],
         actual_labels: list[float],
-        estimated_labels: list[float],
+        estimated_labels_history: list[float],
     ) -> Job:
         if self.config["vqc"]["ansatz"]["type"] == "direct":
             job = self._create_job_for_direct(
@@ -61,7 +62,7 @@ class JobFactory:
                 param_history,
                 iter_history,
                 actual_labels,
-                estimated_labels,
+                estimated_labels_history,
             )
         else:
             job = self._create_job_for_indirect(
@@ -72,7 +73,7 @@ class JobFactory:
                 param_history,
                 iter_history,
                 actual_labels,
-                estimated_labels,
+                estimated_labels_history,
             )
         return job
 
@@ -85,7 +86,7 @@ class JobFactory:
         param_history: list[float],
         iter_history: list[int],
         actual_labels: list[float],
-        estimated_labels: list[float],
+        estimated_labels_history: list[float],
     ) -> Job:
         return Job(
             str(uuid.uuid4()),
@@ -103,7 +104,8 @@ class JobFactory:
             self._to_string(param_history),
             str(iter_history),
             str(actual_labels),
-            str(estimated_labels),
+            str(estimated_labels_history[-1]),
+            str(estimated_labels_history),
             json.dumps(self.config),
         )
 
@@ -116,7 +118,7 @@ class JobFactory:
         param_history: list[float],
         iter_history: list[int],
         actual_labels: list[float],
-        estimated_labels: list[float],
+        estimated_labels_history: list[float],
     ) -> Job:
         return Job(
             str(uuid.uuid4()),
@@ -136,6 +138,7 @@ class JobFactory:
             self._to_string(param_history),
             str(iter_history),
             str(actual_labels),
-            str(estimated_labels),
+            str(estimated_labels_history[-1]),
+            str(estimated_labels_history),
             json.dumps(self.config),
         )
