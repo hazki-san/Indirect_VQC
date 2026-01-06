@@ -19,6 +19,8 @@ from src.database.bigquery import BigQueryClient, create_job_result_table, inser
 from src.database.schema import Job, JobFactory
 from src.database.sqlite import DBClient, create_job_table, insert_job
 
+import time
+import datetime
 
 #count iteration
 count_itr = 0
@@ -39,6 +41,7 @@ class IndirectVQC:
         optimization: Dict,
         dataset: Dict,
         output: Dict,
+        config: Dict,
     ) -> None:
         """
             Args:
@@ -49,6 +52,7 @@ class IndirectVQC:
                 optimization:
                 dataset:
                 output: DBまわり
+                condig: DBに記録する用
 
         """    
         self.nqubit = nqubit
@@ -84,9 +88,10 @@ class IndirectVQC:
 
         #about outputs
         self.dbout_id :str = output["project"]["id"]
-        self.dbout_import :bool = output["bigquary"]["import"]
-        self.dbout_dataset :str = output["bigquary"]["dataset"]
-        self.dbout_table :str = output["bigquary"]["table"]
+        self.dbout_import :bool = output["bigquery"]["import"]
+        self.dbout_dataset :str = output["bigquery"]["dataset"]
+        self.dbout_table :str = output["bigquery"]["table"]
+        self.config = config
 
 
         #open data file
@@ -96,7 +101,7 @@ class IndirectVQC:
         max_values = features.max()
         #正規化
         normalized_features = ((features - min_values) / (max_values - min_values)) * (2 * np.pi)
-        self.train_feature.iloc[:, 0:feature_num] = normalized_features
+        self.train_feature.iloc[:, 0:self.feature_num] = normalized_features
 
         #debug
         print(self.train_feature.head())
@@ -250,10 +255,10 @@ class IndirectVQC:
         print(f"cost_history  {cost_history}")
 
         #record to database
-        job = JobFactory(config).create(
+        job = JobFactory(self.config).create(
             now, start_time, end_time, cost_history, param_history, iter_history, y_train, y_pred_history,
         )
-        record_database(
+        self.record_database(
             job,
             self.dbout_import,
             self.dbout_id,

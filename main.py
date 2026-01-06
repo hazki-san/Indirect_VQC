@@ -53,6 +53,7 @@ def initialize_vqc() -> None:
             optimization = optimization,
             dataset = dataset,
             output = db_output,
+            config=config,
         )
         if runmode == "vqc":
             vqc_output = vqc_instance.run_vqc()
@@ -110,7 +111,7 @@ if __name__ == "__main__":
         runmode :str = config["mode"]
         db_output :Dict = config["output"]
 
-    if args.init:
+    if sys.argv[2] == "init": # ~~ config.yml init みたいなとき 初回だけ
         client = DBClient("data/job_results.sqlite3")
         create_job_table(client)
         if config["output"]["bigquery"]["import"]:
@@ -122,7 +123,7 @@ if __name__ == "__main__":
                 config["output"]["bigquery"]["dataset"],
                 config["output"]["bigquery"]["table"],
             )
-    else:
+    else: #一旦 initの箇所にrunとか入れておく？
         initialize_vqc()
 
 
