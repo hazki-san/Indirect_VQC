@@ -15,9 +15,19 @@ from src.encoding import encode
 from src.ansatz import ansatz_list
 from src.constraint import create_time_constraints
 
+from src.database.bigquery import BigQueryClient, create_job_result_table, insert_job_result
+from src.database.schema import Job, JobFactory
+from src.database.sqlite import DBClient, create_job_table, insert_job
+
+
 #count iteration
 count_itr = 0
 y_train = []
+param_history = []
+cost_history = []
+iter_history = []
+y_pred = []
+y_pred_history = []
 
 class IndirectVQC:
 
@@ -28,6 +38,7 @@ class IndirectVQC:
         init_param: Union[List[float], str],
         optimization: Dict,
         dataset: Dict,
+        output: Dict,
     ) -> None:
         """
             Args:
@@ -37,6 +48,7 @@ class IndirectVQC:
                 init_param[]:空の場合はcreateparamで適当に作る
                 optimization:
                 dataset:
+                output: DBまわり
 
         """    
         self.nqubit = nqubit
@@ -70,6 +82,13 @@ class IndirectVQC:
         self.feature_num :int = dataset["feature_num"]
         self.encode_type :int = dataset["encode_type"]
 
+        #about outputs
+        self.dbout_id :str = output["project"]["id"]
+        self.dbout_import :bool = output["bigquary"]["import"]
+        self.dbout_dataset :str = output["bigquary"]["dataset"]
+        self.dbout_table :str = output["bigquary"]["table"]
+
+
         #open data file
         self.train_feature = pd.read_csv(self.train_data_path, header=None)
         features = self.train_feature.iloc[:, 0:self.feature_num] #irisは1~4列目が特徴量、5列目がラベル
@@ -82,6 +101,26 @@ class IndirectVQC:
         #debug
         print(self.train_feature.head())
 
+    def record(param):
+        global param_history
+        global cost_history
+        global iter_history
+        global count_itr
+        global y_pred
+        global y_pred_history
+        param_history.append(params)
+        cost_history.append(loss_func(param))
+        y_pred_history.append(y_pred)
+        iter_history.append(count_itr)
+
+    def record_database(
+        job: Job, is_bq_import: bool, gcp_project_id: str, dataset: str, table: str
+    ) -> None:
+        client = DBClient("data/job_results.sqlite3")
+        insert_job(client, job)
+        if is_bq_import:
+            bq_client = BigQueryClient(gcp_project_id)
+            insert_job_result(bq_client, job, dataset, table)
 
 
     def create_circuit(self, param, feature):
@@ -118,7 +157,7 @@ class IndirectVQC:
     def loss_func(self, param): #theta param
         
         #theta更新を一行入れる?
-
+        global y_pred
         y_pred = []
 
         for i in range(self.train_num):
@@ -147,9 +186,17 @@ class IndirectVQC:
  
     def run_vqc(self):
 
-        global y_train
-        y_train = self.train_feature.iloc[:,self.feature_num]
+        start_time = time.perf_counter()
+        now = datetime.datetime.now()
 
+        global param_history
+        global cost_history
+        global iter_history
+        global y_pred
+        global y_train
+        global y_pred_history
+
+        y_train = self.train_feature.iloc[:,self.feature_num]
         cost_history = []
         min_cost = None
         optimized_parms = None
@@ -159,7 +206,7 @@ class IndirectVQC:
         #for debug
         print(f"y_train  {y_train}" )
 
-        #もしinit_paramが空かrandomにしろという感じだったら
+        #もしinit_paramが空かrandomにしろという感じだったらの分岐を後で作る
         init_param = create_param(
             depth=self.depth, 
             gateset = self.ansatz_gateset, 
@@ -169,17 +216,19 @@ class IndirectVQC:
             feature_num=self.feature_num,
         )
         #for debug
-        print(init_param)
+        print(f"init_param {init_param}")
 
         #初期(ランダム)パラメータでのコスト関数の値
         initial_cost = self.loss_func(init_param)
+        cost_history.append(initial_cost)
 
-        #constraintの確認
+        #encodeで使うtのnum
         if self.encode_type == 1:
             t_num_en = self.feature_num
         else:
             t_num_en = 1
 
+        #constraintの確認
         if self.constraint and self.optimizar == "SLSQP":
             vqc_constraint = create_time_constraints(self.depth+t_num_en, self.depth*5+t_num_en)
 
@@ -192,18 +241,37 @@ class IndirectVQC:
             method = self.optimizar,
             bounds = bounds,
             constraints = vqc_constraint,
-            callback=lambda x: cost_history.append(self.loss_func(x)),
+            #callback=lambda x: cost_history.append(self.loss_func(x)),
+            callback=self.record,
         )
 
-        min_cost = np.min(cost_history)
-        optimized_param = opt.x.tolist()
+        end_time = time.perf_counter()
+        #debug
+        print(f"cost_history  {cost_history}")
+
+        #record to database
+        job = JobFactory(config).create(
+            now, start_time, end_time, cost_history, param_history, iter_history, y_train, y_pred_history,
+        )
+        record_database(
+            job,
+            self.dbout_import,
+            self.dbout_id,
+            self.dbout_dataset,
+            self.dbout_table,
+        )
+
+        #蛇足なのでそのうちmainと合わせて消したいかも？
+        min_cost = cost_history[-1]
+        optimized_param = param_history[-1]
 
         vqc_result: Dict = {
             "initial_cost": initial_cost,
             "min_cost": min_cost,
             "optimized_param": optimized_param
         }
-
+        
+        
         return vqc_result
 
     def debug(self):

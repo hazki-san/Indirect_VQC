@@ -11,6 +11,11 @@ import yaml
 
 from src.vqc import IndirectVQC
 
+from src.database.bigquery import BigQueryClient, create_job_result_table, insert_job_result
+from src.database.schema import Job, JobFactory
+from src.database.sqlite import DBClient, create_job_table, insert_job
+
+
 symbol_count = 10
 
 #configファイル読み込む
@@ -47,6 +52,7 @@ def initialize_vqc() -> None:
             init_param = initialparam,
             optimization = optimization,
             dataset = dataset,
+            output = db_output,
         )
         if runmode == "vqc":
             vqc_output = vqc_instance.run_vqc()
@@ -102,9 +108,24 @@ if __name__ == "__main__":
         dataset: Dict = config["vqc"]["Dataset"]
         initialparam: Union[str, List[float]] = ansatz["init_param"]
         runmode :str = config["mode"]
+        db_output :Dict = config["output"]
 
-    initialize_vqc()
+    if args.init:
+        client = DBClient("data/job_results.sqlite3")
+        create_job_table(client)
+        if config["output"]["bigquery"]["import"]:
+            bq_client = BigQueryClient(
+                config["output"]["project"]["id"],
+            )
+            create_job_result_table(
+                bq_client,
+                config["output"]["bigquery"]["dataset"],
+                config["output"]["bigquery"]["table"],
+            )
+    else:
+        initialize_vqc()
 
-    #DBに色々する処理を追加する　阿南さんの参照
+
+
 
         
