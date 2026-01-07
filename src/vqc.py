@@ -12,10 +12,10 @@ from scipy.optimize import minimize
 from src.createparam import create_param
 from src.hamiltonian import create_xy_hamiltonian
 from src.encoding import encode
-from src.ansatz import ansatz_list
+from src.ansatz import ansatz_list, he_ansatz
 from src.constraint import create_time_constraints
 
-from src.database.bigquery import BigQueryClient, create_job_result_table, insert_job_result
+#from src.database.bigquery import BigQueryClient, create_job_result_table, insert_job_result
 from src.database.schema import Job, JobFactory
 from src.database.sqlite import DBClient, create_job_table, insert_job
 
@@ -133,9 +133,9 @@ class IndirectVQC:
     ) -> None:
         client = DBClient("data/job_results.sqlite3")
         insert_job(client, job)
-        if is_bq_import:
-            bq_client = BigQueryClient(gcp_project_id)
-            insert_job_result(bq_client, job, dataset, table)
+        #if is_bq_import:
+            #bq_client = BigQueryClient(gcp_project_id)
+            #insert_job_result(bq_client, job, dataset, table)
 
 
     def create_circuit(self, param, feature):
@@ -153,17 +153,23 @@ class IndirectVQC:
             feature_num=self.feature_num,
         )
         #ランダムなansatzを入れる 何層か
+        if(self.encode_type == -1): # direct
+            ansatz_circuit = he_ansatz(
+                nqubit=self.nqubit,
+                depth=self.depth,
+                param=param
+            )
+        else: # indirect
+            ansatz_circuit = ansatz_list(
+                nqubit = self.nqubit,
+                depth = self.depth,
+                param = param,
+                ugateH = self.ugate_hami,
+                gateset = self.ansatz_gateset,
+                encode_type=self.encode_type,
+                feature_num=self.feature_num,
 
-        ansatz_circuit = ansatz_list(
-            nqubit = self.nqubit,
-            depth = self.depth,
-            param = param,
-            ugateH = self.ugate_hami,
-            gateset = self.ansatz_gateset,
-            encode_type=self.encode_type,
-            feature_num=self.feature_num,
-
-        )
+            )
         circuit = encoding_circuit
         circuit.merge_circuit(ansatz_circuit)
 
@@ -224,6 +230,9 @@ class IndirectVQC:
 
         #for debug
         print(f"y_train  {self.y_train}" )
+
+        if self.ansatz_type == "direct":
+            self.encode_type = -1 #encodeそのまま使いたかったのでこの処理
 
         #もしinit_paramが空かrandomにしろという感じだったらの分岐を後で作る
         init_param = create_param(

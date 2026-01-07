@@ -11,7 +11,7 @@ import yaml
 
 from src.vqc import IndirectVQC
 
-from src.database.bigquery import BigQueryClient, create_job_result_table, insert_job_result
+#from src.database.bigquery import BigQueryClient, create_job_result_table, insert_job_result
 from src.database.schema import Job, JobFactory
 from src.database.sqlite import DBClient, create_job_table, insert_job
 
@@ -114,6 +114,7 @@ if __name__ == "__main__":
     if sys.argv[2] == "init": # ~~ config.yml init みたいなとき 初回だけ
         client = DBClient("data/job_results.sqlite3")
         create_job_table(client)
+        """
         if config["output"]["bigquery"]["import"]:
             bq_client = BigQueryClient(
                 config["output"]["project"]["id"],
@@ -123,6 +124,7 @@ if __name__ == "__main__":
                 config["output"]["bigquery"]["dataset"],
                 config["output"]["bigquery"]["table"],
             )
+        """
     else: #一旦 initの箇所にrunとか入れておく？
         initialize_vqc()
 
