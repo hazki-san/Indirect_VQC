@@ -15,7 +15,6 @@ from src.encoding import encode
 from src.ansatz import ansatz_list, he_ansatz
 from src.constraint import create_time_constraints
 
-#from src.database.bigquery import BigQueryClient, create_job_result_table, insert_job_result
 from src.database.schema import Job, JobFactory
 from src.database.sqlite import DBClient, create_job_table, insert_job
 
@@ -133,10 +132,6 @@ class IndirectVQC:
     ) -> None:
         client = DBClient("data/job_results.sqlite3")
         insert_job(client, job)
-        #if is_bq_import:
-            #bq_client = BigQueryClient(gcp_project_id)
-            #insert_job_result(bq_client, job, dataset, table)
-
 
     def create_circuit(self, param, feature):
 
