@@ -23,6 +23,7 @@ class Job:
     actual_labels: str
     estimated_labels: str
     estimated_labels_history: str
+    encode_type: int
     config: str
 
 
@@ -106,6 +107,7 @@ class JobFactory:
             str(actual_labels),
             str(estimated_labels_history[-1]),
             str(estimated_labels_history),
+            "",
             json.dumps(self.config),
         )
 
@@ -140,5 +142,6 @@ class JobFactory:
             str(actual_labels),
             str(estimated_labels_history[-1]),
             str(estimated_labels_history),
+            self.config["vqc"]["Dataset"]["encode_type"],
             json.dumps(self.config),
         )

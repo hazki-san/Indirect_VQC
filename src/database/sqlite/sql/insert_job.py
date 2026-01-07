@@ -18,6 +18,7 @@ def sql_for_insert_job() -> str:
         actual_labels,
         estimated_labels,
         estimated_labels_history,
+        encode_type,
         config
     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """
