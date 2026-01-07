@@ -24,7 +24,6 @@ import datetime
 
 #count iteration
 count_itr = 0
-y_train = []
 param_history = []
 cost_history = []
 iter_history = []
@@ -93,33 +92,44 @@ class IndirectVQC:
         self.dbout_table :str = output["bigquery"]["table"]
         self.config = config
 
-
+        df = pd.read_csv(self.train_data_path, header=None)
+        features = df.iloc[:, 0:self.feature_num].to_numpy(dtype = float)
+        ys = df.iloc[:, self.feature_num].to_numpy(dtype=float)
+        min_values = features.min(axis=0)
+        max_values = features.max(axis=0)
+        #正規化
+        normalized_features = ((features - min_values) / (max_values - min_values)) * (2 * np.pi)
+        self.train_features = normalized_features
+        self.y_train = ys
+        
+        
+        """
         #open data file
         self.train_feature = pd.read_csv(self.train_data_path, header=None)
-        features = self.train_feature.iloc[:, 0:self.feature_num] #irisは1~4列目が特徴量、5列目がラベル
+        features = self.train_feature.iloc[:, 0:self.feature_num].tolist() #irisは1~4列目が特徴量、5列目がラベル
         min_values = features.min()
         max_values = features.max()
         #正規化
         normalized_features = ((features - min_values) / (max_values - min_values)) * (2 * np.pi)
         self.train_feature.iloc[:, 0:self.feature_num] = normalized_features
-
+        """
         #debug
-        print(self.train_feature.head())
+        print(self.train_features)
 
-    def record(param):
+    def record(self, param):
         global param_history
         global cost_history
         global iter_history
         global count_itr
         global y_pred
         global y_pred_history
-        param_history.append(params)
-        cost_history.append(loss_func(param))
-        y_pred_history.append(y_pred)
+        param_history.append(param)
+        #cost_history.append(self.loss_func(param))
+        #y_pred_history.append(list(y_pred))
         iter_history.append(count_itr)
 
     def record_database(
-        job: Job, is_bq_import: bool, gcp_project_id: str, dataset: str, table: str
+        self, job: Job, is_bq_import: bool, gcp_project_id: str, dataset: str, table: str
     ) -> None:
         client = DBClient("data/job_results.sqlite3")
         insert_job(client, job)
@@ -170,7 +180,7 @@ class IndirectVQC:
             state.set_zero_state()
 
             #入力状態計算、出力状態計算
-            self.create_circuit(param, self.train_feature.iloc[i, 0:self.feature_num]).update_quantum_state(state)
+            self.create_circuit(param, self.train_features[i]).update_quantum_state(state)
 
             #モデルの出力(Z)
             obs = Observable(self.nqubit)
@@ -185,8 +195,14 @@ class IndirectVQC:
             print(f"--------------------------------------------")
         count_itr += 1
 
-        loss = ((y_pred - y_train)**2).mean()
-
+        loss = ((y_pred - self.y_train)**2).mean()
+        
+        #record
+        global cost_history
+        global y_pred_history
+        cost_history.append(loss)
+        y_pred_history.append(np.array(y_pred).tolist())
+        
         return loss
  
     def run_vqc(self):
@@ -198,10 +214,8 @@ class IndirectVQC:
         global cost_history
         global iter_history
         global y_pred
-        global y_train
         global y_pred_history
 
-        y_train = self.train_feature.iloc[:,self.feature_num]
         cost_history = []
         min_cost = None
         optimized_parms = None
@@ -209,7 +223,7 @@ class IndirectVQC:
         initial_cost: float = None
 
         #for debug
-        print(f"y_train  {y_train}" )
+        print(f"y_train  {self.y_train}" )
 
         #もしinit_paramが空かrandomにしろという感じだったらの分岐を後で作る
         init_param = create_param(
@@ -256,7 +270,7 @@ class IndirectVQC:
 
         #record to database
         job = JobFactory(self.config).create(
-            now, start_time, end_time, cost_history, param_history, iter_history, y_train, y_pred_history,
+            now, start_time, end_time, cost_history, param_history, iter_history, self.y_train, y_pred_history,
         )
         self.record_database(
             job,
@@ -281,9 +295,6 @@ class IndirectVQC:
 
     def debug(self):
 
-        global y_train
-        y_train = self.train_feature.iloc[:,self.feature_num]
-
         cost_history = []
         min_cost = None
         optimized_parms = None
@@ -291,7 +302,7 @@ class IndirectVQC:
         initial_cost: float = None
 
         #for debug
-        print(f"y_train  {y_train}" )
+        print(f"y_train  {self.y_train}" )
 
         #もしinit_paramが空かrandomにしろという感じだったら
         init_param = create_param(
