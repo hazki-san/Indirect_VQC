@@ -25,6 +25,8 @@ def create_param(depth: int, gateset: int, t_init: float, t_final: float, encode
     #Time param
     if encode_type == 1:
         time = np.random.uniform(t_init, t_final, depth + feature_num) #今のところ+4
+    elif encode_type == 2:
+        time = np.random.uniform(t_init, t_final, depth + 1 + 3) #1は普通にエンコード、後ろの3は適当なランダムパラメータ回路の個数 ansatz,encodingと整合性取って
     else:
         time = np.random.uniform(t_init, t_final, depth+1)
 

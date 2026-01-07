@@ -27,6 +27,8 @@ def ansatz_list(nqubit: int, depth: int, param: list[float], ugateH: Observable,
     
     if encode_type == 1:
         en_t_num = feature_num
+    elif encode_type == 2:
+        en_t_num = 1 + 3 #3に関しては適当 createparamの方と整合性を取って
     else:
         en_t_num = 1 
 
@@ -34,7 +36,7 @@ def ansatz_list(nqubit: int, depth: int, param: list[float], ugateH: Observable,
 
     for d in range(depth):
         #gateset周りが多分createparamのところでつじつま合わせできていないのでとりあえず1固定このまま
-        #あとでgateset消す 普通にdepth増やして対応したい
+        
         circuit.add_gate(RX(0, param[flag]))
         circuit.add_gate(RX(1, param[flag + 1]))
         circuit.add_gate(RY(0, param[flag + 2]))

@@ -42,6 +42,27 @@ def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ug
             circuit.add_gate(CZ(0, 1))
 
             circuit.add_gate(t_evo_gate)
+    elif encode_type == 2:
+        circuit.add_gate(RX(0, feature[0]))
+        circuit.add_gate(RX(1, feature[1]))
+        circuit.add_gate(RY(0, feature[2]))
+        circuit.add_gate(RY(1, feature[3]))
+        circuit.add_gate(CZ(0, 1))
+        t_before = 0
+        t_after = param[0]
+        time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
+        circuit.add_gate(time_evo_gate)
+
+        for i in range (3):#3は適当な数createparamとansatzと整合性を取って
+            circuit.add_gate(RX(0, np.random.uniform(0.0,2*np.pi)))
+            circuit.add_gate(RX(1, np.random.uniform(0.0,2*np.pi)))
+            circuit.add_gate(RY(0, np.random.uniform(0.0,2*np.pi)))
+            circuit.add_gate(RY(1, np.random.uniform(0.0,2*np.pi)))
+            circuit.add_gate(CZ(0, 1))
+            t_before = param[i]
+            t_after = param[i+1]
+            time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
+            circuit.add_gate(time_evo_gate)
     else:
         
         circuit.add_gate(RX(0, feature[0]))
