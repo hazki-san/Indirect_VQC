@@ -256,7 +256,7 @@ class IndirectVQC:
             vqc_constraint = create_time_constraints(self.depth+t_num_en, self.depth*5+t_num_en)
 
         bounds = [(0, 2*np.pi)] * len(init_param)
-
+        option = {"maxiter": 2000}
         #最適化実行
         opt = minimize(
             fun=self.loss_func, 
@@ -266,6 +266,7 @@ class IndirectVQC:
             constraints = vqc_constraint,
             #callback=lambda x: cost_history.append(self.loss_func(x)),
             callback=self.record,
+            options=option,
         )
 
         end_time = time.perf_counter()
