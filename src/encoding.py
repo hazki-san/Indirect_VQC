@@ -7,7 +7,17 @@ from qulacs.gate import CZ, RX, RY, RZ, Identity, Y, merge
 
 from src.time_evolusion_gate import create_time_evo_unitary
 
-def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ugateH: Observable, encode_type: int, feature_num: int) -> QuantumCircuit:
+def encode(
+    nqubit: int, 
+    feature: list[float], 
+    param: list[float], 
+    depth: int, 
+    ugateH: Observable, 
+    encode_type: int, 
+    feature_num: int,
+    num_for_et2layer: int,
+    fixed_random_params: list[float],
+) -> QuantumCircuit:
     """
     VQC encoding circuit after encoding part
    
@@ -25,7 +35,12 @@ def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ug
     """
 
     circuit = QuantumCircuit(nqubit)
-    if encode_type == 1:
+    if encode_type == -1: #hardware efficient circuit
+        for i in range (depth):
+            for j in range (feature_num):
+                circuit.add_gate(RX(i, feature[j]))
+
+    elif encode_type == 1:
         for i in range (feature_num):
             if i == 0:
                 t_before = 0
@@ -36,9 +51,9 @@ def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ug
             t_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
 
             circuit.add_gate(RX(0, feature[i]))
-            circuit.add_gate(RX(1, np.random.uniform(0.0,2*np.pi)))
-            circuit.add_gate(RY(0, np.random.uniform(0.0,2*np.pi)))
-            circuit.add_gate(RY(1, np.random.uniform(0.0,2*np.pi)))
+            circuit.add_gate(RX(1, fixed_random_params[3*i]))
+            circuit.add_gate(RY(0, fixed_random_params[3*i+1]))
+            circuit.add_gate(RY(1, fixed_random_params[3*i+2]))
             circuit.add_gate(CZ(0, 1))
 
             circuit.add_gate(t_evo_gate)
@@ -53,16 +68,17 @@ def encode(nqubit: int, feature: list[float], param: list[float], depth: int, ug
         time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
         circuit.add_gate(time_evo_gate)
 
-        for i in range (3):#3は適当な数createparamとansatzと整合性を取って
-            circuit.add_gate(RX(0, np.random.uniform(0.0,2*np.pi)))
-            circuit.add_gate(RX(1, np.random.uniform(0.0,2*np.pi)))
-            circuit.add_gate(RY(0, np.random.uniform(0.0,2*np.pi)))
-            circuit.add_gate(RY(1, np.random.uniform(0.0,2*np.pi)))
+        for i in range (num_for_et2layer):
+            circuit.add_gate(RX(0, fixed_random_params[4*i]))
+            circuit.add_gate(RX(1, fixed_random_params[4*i+1]))
+            circuit.add_gate(RY(0, fixed_random_params[4*i+2]))
+            circuit.add_gate(RY(1, fixed_random_params[4*i+3]))
             circuit.add_gate(CZ(0, 1))
             t_before = param[i]
             t_after = param[i+1]
             time_evo_gate = create_time_evo_unitary(ugateH, t_before, t_after)
             circuit.add_gate(time_evo_gate)
+
     else:
         
         circuit.add_gate(RX(0, feature[0]))

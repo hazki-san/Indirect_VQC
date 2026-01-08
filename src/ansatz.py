@@ -5,7 +5,16 @@ from qulacs.gate import CZ, RX, RY, RZ, Identity, Y, merge
 
 from .time_evolusion_gate import create_time_evo_unitary
 
-def ansatz_list(nqubit: int, depth: int, param: list[float], ugateH: Observable, gateset: int, encode_type: int, feature_num: int) -> QuantumCircuit:
+def ansatz_list(
+    nqubit: int, 
+    depth: int, 
+    param: list[float], 
+    ugateH: Observable, 
+    gateset: int, 
+    encode_type: int, 
+    feature_num: int,
+    num_for_et2layer: int,
+) -> QuantumCircuit:
     """
     VQC ansatz circuit after encoding part
    
@@ -28,7 +37,7 @@ def ansatz_list(nqubit: int, depth: int, param: list[float], ugateH: Observable,
     if encode_type == 1:
         en_t_num = feature_num
     elif encode_type == 2:
-        en_t_num = 1 + 3 #3に関しては適当 createparamの方と整合性を取って
+        en_t_num = 1 + num_for_et2layer
     else:
         en_t_num = 1 
 
@@ -53,4 +62,21 @@ def ansatz_list(nqubit: int, depth: int, param: list[float], ugateH: Observable,
         flag += 4 
 
     return circuit
-            
+
+def he_ansatz(nqubit: int, depth: int, param: list[float]):
+    
+    circuit = QuantumCircuit(nqubit)
+    for d in range (depth):
+        for i in range (nqubit):
+            circuit.add_gate(RY(i, param[2*nqubit*d + 2*i]))
+            circuit.add_gate(RZ(i, param[2*nqubit*d + 2*i+1]))
+        for i in range(nqubit // 2):
+            circuit.add_gate(CZ(2*i, 2*i+1))
+        for i in range (nqubit // 2 - 1):
+            circuit.add_gate(CZ(2*i+1, 2*i+2))
+    #追加の回転
+    for i in range (nqubit):
+        circuit.add_gate(RX, param[2*i + 2*nqubit*depth])
+        circuit.add_gate(RX, param[2*i + 2*nqubit*depth + 1])
+    
+    return circuit
