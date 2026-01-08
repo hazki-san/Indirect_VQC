@@ -287,7 +287,7 @@ class IndirectVQC:
 
         #record to database
         job = JobFactory(self.config).create(
-            now, start_time, end_time, cost_history, param_history, iter_history, self.y_train, y_pred_history,
+            now, start_time, end_time, cost_history, param_history, iter_history, self.y_train, y_pred_history, self.fixed_random_params,
         )
         self.record_database(
             job,
