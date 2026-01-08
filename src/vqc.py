@@ -100,6 +100,14 @@ class IndirectVQC:
         normalized_features = ((features - min_values) / (max_values - min_values)) * (2 * np.pi)
         self.train_features = normalized_features
         self.y_train = ys
+
+        self.fixed_random_params = []
+        self.et2_layers = 3
+        #ecnodetypeごとの固定ランダムパラメータ
+        if self.encode_type == 1:
+            self.fixed_random_params = np.random.uniform(0, np.pi*2, self.feature_num*3)
+        elif self.encode_type == 2:
+            self.fixed_random_params = np.random.uniform(0, np.pi*2, self.et2_layers*4)
         
         
         """
@@ -146,6 +154,8 @@ class IndirectVQC:
             ugateH=self.ugate_hami,
             encode_type=self.encode_type,
             feature_num=self.feature_num,
+            num_for_et2layer=self.et2_layers,
+            fixed_random_params=self.fixed_random_params,
         )
         #ランダムなansatzを入れる 何層か
         if(self.encode_type == -1): # direct
@@ -163,7 +173,7 @@ class IndirectVQC:
                 gateset = self.ansatz_gateset,
                 encode_type=self.encode_type,
                 feature_num=self.feature_num,
-
+                num_for_et2layer=self.et2_layers,
             )
         circuit = encoding_circuit
         circuit.merge_circuit(ansatz_circuit)
@@ -237,6 +247,7 @@ class IndirectVQC:
             t_final=self.ansatz_t_max,
             encode_type=self.encode_type,
             feature_num=self.feature_num,
+            num_for_et2layer=self.et2_layers
         )
         #for debug
         print(f"init_param {init_param}")
@@ -254,21 +265,22 @@ class IndirectVQC:
         #constraintの確認
         if self.constraint and self.optimizar == "SLSQP":
             vqc_constraint = create_time_constraints(self.depth+t_num_en, self.depth*5+t_num_en)
-
-        bounds = [(0, 2*np.pi)] * len(init_param)
+        
+        #bounds = [(0, 2*np.pi)] * len(init_param)
+        
         option = {"maxiter": 2000}
+        
         #最適化実行
         opt = minimize(
             fun=self.loss_func, 
             x0=init_param,
             method = self.optimizar,
-            bounds = bounds,
+            #bounds = bounds,
             constraints = vqc_constraint,
             #callback=lambda x: cost_history.append(self.loss_func(x)),
             callback=self.record,
             options=option,
         )
-
         end_time = time.perf_counter()
         #debug
         print(f"cost_history  {cost_history}")
