@@ -102,7 +102,7 @@ class IndirectVQC:
         self.y_train = ys
 
         self.fixed_random_params = []
-        self.et2_layers = 3
+        self.et2_layers = 3 #configから持ってくるようにそのうち変更
         #ecnodetypeごとの固定ランダムパラメータ
         if self.encode_type == 1:
             self.fixed_random_params = np.random.uniform(0, np.pi*2, self.feature_num*3)
