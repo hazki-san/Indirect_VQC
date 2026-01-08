@@ -19,6 +19,7 @@ def sql_for_create_table() -> str:
       estimated_labels TEXT,
       estimated_labels_history TEXT,
       encode_type INTEGER,
+      fixed_random_params TEXT,
       config TEXT
     )
     """

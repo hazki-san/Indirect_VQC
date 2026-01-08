@@ -53,6 +53,7 @@ class JobFactory:
         iter_history: list[int],
         actual_labels: list[float],
         estimated_labels_history: list[float],
+        fixed_random_params: list[float],
     ) -> Job:
         if self.config["vqc"]["ansatz"]["type"] == "direct":
             job = self._create_job_for_direct(
@@ -75,6 +76,7 @@ class JobFactory:
                 iter_history,
                 actual_labels,
                 estimated_labels_history,
+                fixed_random_params,
             )
         return job
 
@@ -108,6 +110,7 @@ class JobFactory:
             str(estimated_labels_history[-1]),
             str(estimated_labels_history),
             "",
+            "",
             json.dumps(self.config),
         )
 
@@ -121,6 +124,7 @@ class JobFactory:
         iter_history: list[int],
         actual_labels: list[float],
         estimated_labels_history: list[float],
+        fixed_random_params: list[float]
     ) -> Job:
         return Job(
             str(uuid.uuid4()),
@@ -143,5 +147,6 @@ class JobFactory:
             str(estimated_labels_history[-1]),
             str(estimated_labels_history),
             self.config["vqc"]["Dataset"]["encode_type"],
+            str(fixed_random_params),
             json.dumps(self.config),
         )
