@@ -24,6 +24,7 @@ class Job:
     estimated_labels: str
     estimated_labels_history: str
     encode_type: int
+    fixed_random_params: str
     config: str
 
 
