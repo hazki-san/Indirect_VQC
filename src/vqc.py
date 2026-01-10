@@ -311,6 +311,15 @@ class IndirectVQC:
         return vqc_result
 
     def debug(self):
+  
+        start_time = time.perf_counter()
+        now = datetime.datetime.now()
+
+        global param_history
+        global cost_history
+        global iter_history
+        global y_pred
+        global y_pred_history
 
         cost_history = []
         min_cost = None
@@ -321,32 +330,66 @@ class IndirectVQC:
         #for debug
         print(f"y_train  {self.y_train}" )
 
-        #もしinit_paramが空かrandomにしろという感じだったら
+        if self.ansatz_type == "direct":
+            self.encode_type = -1 #encodeそのまま使いたかったのでこの処理
+
+        #もしinit_paramが空かrandomにしろという感じだったらの分岐を後で作る
         init_param = create_param(
             depth=self.depth, 
             gateset = self.ansatz_gateset, 
             t_init = self.ansatz_t_min, 
             t_final=self.ansatz_t_max,
+            encode_type=self.encode_type,
+            feature_num=self.feature_num,
+            num_for_et2layer=self.et2_layers
         )
         #for debug
-        
-        print(f"init_param  {init_param}" )
-
+        print(f"init_param {init_param}")
 
         #初期(ランダム)パラメータでのコスト関数の値
         initial_cost = self.loss_func(init_param)
+        cost_history.append(initial_cost)
 
-        min_cost = None
+        #encodeで使うtのnum
+        if self.encode_type == 1:
+            t_num_en = self.feature_num
+        else:
+            t_num_en = 1
 
-        #constraintsの確認
+        #constraintの確認
+        if self.constraint and self.optimizar == "SLSQP":
+            vqc_constraint = create_time_constraints(self.depth+t_num_en, self.depth*5+t_num_en)
+        
+        #bounds = [(0, 2*np.pi)] * len(init_param)
+        
+        option = {"maxiter": 2000}
+        
+        #最適化実行 しない
 
-        #最適化実行
+        #debug
+        #print(f"cost_history  {cost_history}")
 
+        #record to database
+        job = JobFactory(self.config).create(
+            now, start_time, end_time, cost_history, param_history, iter_history, self.y_train, y_pred_history, self.fixed_random_params,
+        )
+        self.record_database(
+            job,
+            self.dbout_import,
+            self.dbout_id,
+            self.dbout_dataset,
+            self.dbout_table,
+        )
+
+        #蛇足なのでそのうちmainと合わせて消したいかも？
+        min_cost = cost_history[-1]
+        optimized_param = param_history[-1]
 
         vqc_result: Dict = {
             "initial_cost": initial_cost,
             "min_cost": min_cost,
-            "optimized_param": None
+            "optimized_param": optimized_param
         }
-
+        
+        
         return vqc_result
