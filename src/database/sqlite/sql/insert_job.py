@@ -20,6 +20,6 @@ def sql_for_insert_job() -> str:
         estimated_labels_history,
         encode_type,
         fixed_random_params,
-        config,
+        config
     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """

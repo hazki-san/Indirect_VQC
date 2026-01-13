@@ -76,7 +76,7 @@ def he_ansatz(nqubit: int, depth: int, param: list[float]):
             circuit.add_gate(CZ(2*i+1, 2*i+2))
     #追加の回転
     for i in range (nqubit):
-        circuit.add_gate(RX, param[2*i + 2*nqubit*depth])
-        circuit.add_gate(RX, param[2*i + 2*nqubit*depth + 1])
+        circuit.add_gate(RX(i, param[2*i + 2*nqubit*depth]))
+        circuit.add_gate(RX(i, param[2*i + 2*nqubit*depth + 1]))
     
     return circuit
