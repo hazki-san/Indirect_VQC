@@ -39,4 +39,10 @@ def create_param(depth: int, gateset: int, t_init: float, t_final: float, encode
 
     return param
 
+def create_he_param(nqubit: int, depth: int):
+    param = np.array([])
+    theta = np.random.random(2*nqubit*depth + 2*nqubit)
+    param = np.append(param, theta)
+
+    return param
     

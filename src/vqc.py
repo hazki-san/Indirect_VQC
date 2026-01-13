@@ -9,7 +9,7 @@ from qulacs import DensityMatrix, Observable, QuantumCircuit, QuantumState
 from qulacsvis import circuit_drawer
 from scipy.optimize import minimize
 
-from src.createparam import create_param
+from src.createparam import create_param, create_he_param
 from src.hamiltonian import create_xy_hamiltonian
 from src.encoding import encode
 from src.ansatz import ansatz_list, he_ansatz
@@ -236,19 +236,20 @@ class IndirectVQC:
         #for debug
         print(f"y_train  {self.y_train}" )
 
+        init_param = []
         if self.ansatz_type == "direct":
             self.encode_type = -1 #encodeそのまま使いたかったのでこの処理
-
-        #もしinit_paramが空かrandomにしろという感じだったらの分岐を後で作る
-        init_param = create_param(
-            depth=self.depth, 
-            gateset = self.ansatz_gateset, 
-            t_init = self.ansatz_t_min, 
-            t_final=self.ansatz_t_max,
-            encode_type=self.encode_type,
-            feature_num=self.feature_num,
-            num_for_et2layer=self.et2_layers
-        )
+            init_param = create_he_param(self.nqubit, self.depth)
+        else:
+            init_param = create_param(
+                depth=self.depth, 
+                gateset = self.ansatz_gateset, 
+                t_init = self.ansatz_t_min, 
+                t_final=self.ansatz_t_max,
+                encode_type=self.encode_type,
+                feature_num=self.feature_num,
+                num_for_et2layer=self.et2_layers
+            )
         #for debug
         print(f"init_param {init_param}")
 
@@ -256,7 +257,7 @@ class IndirectVQC:
         initial_cost = self.loss_func(init_param)
         cost_history.append(initial_cost)
 
-        #encodeで使うtのnum
+        #encodeで使うtのnum 真下のconstraintで使う
         if self.encode_type == 1:
             t_num_en = self.feature_num
         else:
@@ -366,6 +367,7 @@ class IndirectVQC:
         
         #最適化実行 しない
 
+        end_time = time.perf_counter()
         #debug
         #print(f"cost_history  {cost_history}")
 
@@ -382,8 +384,8 @@ class IndirectVQC:
         )
 
         #蛇足なのでそのうちmainと合わせて消したいかも？
-        min_cost = cost_history[-1]
-        optimized_param = param_history[-1]
+        min_cost = cost_history[0]
+        optimized_param = param_history[0]
 
         vqc_result: Dict = {
             "initial_cost": initial_cost,
