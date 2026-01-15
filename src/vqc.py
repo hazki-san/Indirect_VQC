@@ -131,8 +131,8 @@ class IndirectVQC:
         global y_pred
         global y_pred_history
         param_history.append(param)
-        #cost_history.append(self.loss_func(param))
-        #y_pred_history.append(list(y_pred))
+        cost_history.append(self.loss_func(param))
+        y_pred_history.append(np.array(y_pred).tolist())
         iter_history.append(count_itr)
 
     def record_database(
@@ -209,10 +209,10 @@ class IndirectVQC:
         loss = ((y_pred - self.y_train)**2).mean()
         
         #record
-        global cost_history
-        global y_pred_history
-        cost_history.append(loss)
-        y_pred_history.append(np.array(y_pred).tolist())
+        #global cost_history
+        #global y_pred_history
+        #cost_history.append(loss)
+        #y_pred_history.append(np.array(y_pred).tolist())
         
         return loss
  
