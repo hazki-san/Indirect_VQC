@@ -31,13 +31,13 @@ def automate_process(yml_file_path, backup_file_path):
     #一応バックアップ ほぼ要らないかも
     backup_yml_file(yml_file_path, backup_file_path)
 
-    for i in range (5): #depth 4 8 12 16 20
+    for i in range (2): #depth 16 20
         for j in range (3): #encode type 0 1 2
             #書き換え
             with open(yml_file_path, 'r') as file:
                 data = yaml.safe_load(file)
 
-            data["vqc"]["ansatz"]["depth"] = 4 + 4*i
+            data["vqc"]["ansatz"]["depth"] = 16 + 4*i
             data["vqc"]["Dataset"]["encode_type"] = j
 
             with open(yml_file_path, 'w') as file:
@@ -45,9 +45,9 @@ def automate_process(yml_file_path, backup_file_path):
             #書き換え終了
 
             #run       
-            print(f"depth {4*i+4} encode_type {j}  start.")
+            print(f"depth {4*i+16} encode_type {j}  start.")
             run_python_script()
-            print(f"depth {4*i+4} encode_type {j}  done.")
+            print(f"depth {4*i+16} encode_type {j}  done.")
 
 
 yml_file_path = 'config.yml'  # YAMLファイルのパス
