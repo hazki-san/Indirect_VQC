@@ -185,6 +185,8 @@ class IndirectVQC:
         #theta更新を一行入れる?
         global y_pred
         y_pred = []
+        obs = Observable(self.nqubit)
+        obs.add_operator(1.,'Z 0')
 
         for i in range(self.train_num):
             state = QuantumState(self.nqubit)
@@ -194,8 +196,6 @@ class IndirectVQC:
             self.create_circuit(param, self.train_features[i]).update_quantum_state(state)
 
             #モデルの出力(Z)
-            obs = Observable(self.nqubit)
-            obs.add_operator(1.,'Z 0')
             y_pred.append(obs.get_expectation_value(state))
 
         #debug

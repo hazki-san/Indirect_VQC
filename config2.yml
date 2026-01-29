@@ -5,7 +5,7 @@
 mode: "vqc"
 
 # System configuration
-nqubit: 6
+nqubit: 7
 # State options: 'dmatrix' and 'statevector' ここ分かってない
 state: "dmatrix"
 
@@ -45,7 +45,7 @@ vqc:
   #dataset configuration
   Dataset:
     feature_num: 4
-    encode_type: 1   #0: 最初の1層目の4パラメータにそのまま特徴量を入れる。汎用性なさすぎるので多分あまり使わないと思う 1: 0ビット目一つ目に特徴量、他はランダムなパラメータで特徴量分回路を繰り返すタイプ。多分こっちで進めるかも？ 2: 0の形の後ろに何そうかランダムな角度パラメータの回路を挟む
+    encode_type: 2   #0: 最初の1層目の4パラメータにそのまま特徴量を入れる。汎用性なさすぎるので多分あまり使わないと思う 1: 0ビット目一つ目に特徴量、他はランダムなパラメータで特徴量分回路を繰り返すタイプ。多分こっちで進めるかも？ 2: 0の形の後ろに何そうかランダムな角度パラメータの回路を挟む
     train:
       path: "dataset/iris/iris_processed_train.data"
       num: 80

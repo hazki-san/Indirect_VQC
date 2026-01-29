@@ -36,9 +36,12 @@ def encode(
 
     circuit = QuantumCircuit(nqubit)
     if encode_type == -1: #hardware efficient circuit
-        for i in range (nqubit):
-            for j in range (feature_num):
-                circuit.add_gate(RX(i, feature[j]))
+        #for i in range (nqubit):
+        #    for j in range (feature_num):
+        #        circuit.add_gate(RX(i, feature[j]))
+        for i in rage (feature_num):
+            circuit.add_gate(RX(i, feature[i]))
+
 
     elif encode_type == 1:
         for i in range (feature_num):

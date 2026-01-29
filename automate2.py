@@ -6,7 +6,7 @@ import shutil
 def run_python_script():
     try:
         result = subprocess.run(
-            ['python', 'main.py', 'config.yml', 'run'], 
+            ['python', 'main.py', 'config2.yml', 'run'], 
             capture_output=True, text=True
         )
         if result.returncode != 0:
@@ -31,27 +31,25 @@ def automate_process(yml_file_path, backup_file_path):
     #一応バックアップ ほぼ要らないかも
     backup_yml_file(yml_file_path, backup_file_path)
 
-    for i in range (4): #depth 4 ~ 16
-        for j in range (3): #encode type 0 1 2
-            #書き換え
-            with open(yml_file_path, 'r', encoding='utf-8') as file:
-                data = yaml.safe_load(file)
+    for i in range (2): #depth 12 16
+        #書き換え
+        with open(yml_file_path, 'r') as file:
+            data = yaml.safe_load(file)
 
-            data["vqc"]["ansatz"]["depth"] = 4 + 4*i
-            data["vqc"]["Dataset"]["encode_type"] = j
+        data["vqc"]["ansatz"]["depth"] = 12 + 4*i
 
-            with open(yml_file_path, 'w') as file:
-                yaml.dump(data, file) 
-            #書き換え終了
+        with open(yml_file_path, 'w') as file:
+            yaml.dump(data, file) 
+        #書き換え終了
 
-            #run       
-            print(f"depth {4*i+4} encode_type {j}  start.")
-            run_python_script()
-            print(f"depth {4*i+4} encode_type {j}  done.")
+        #run       
+        print(f"depth {4*i+16} encode_type {j}  start.")
+        run_python_script()
+        print(f"depth {4*i+16} encode_type {j}  done.")
 
 
-yml_file_path = 'config.yml'  # YAMLファイルのパス
-backup_file_path = 'config_backup.yml'  # バックアップファイルのパス
+yml_file_path = 'config2.yml'  # YAMLファイルのパス
+backup_file_path = 'config2_backup.yml'  # バックアップファイルのパス
 
 automate_process(yml_file_path, backup_file_path)
 #repeat_automate_process(yml_file_path, backup_file_path, 10)
