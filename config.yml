@@ -25,6 +25,7 @@ vqc:
     type: "xy"
     depth: 12
     gateset: 1
+    parameters: []
     ugate:
       coefficient:
         cn: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]

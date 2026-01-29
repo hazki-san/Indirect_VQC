@@ -69,6 +69,7 @@ class IndirectVQC:
         self.ansatz_cn: List = ansatz["ugate"]["coefficient"]["cn"]
         self.ansatz_bn: List = ansatz["ugate"]["coefficient"]["bn"]
         self.ansatz_r: float = ansatz["ugate"]["coefficient"]["r"]
+        self.sp_params: List = ansatz["parameters"]
         
         self.init_param = init_param
         
@@ -310,6 +311,58 @@ class IndirectVQC:
         
         
         return vqc_result
+
+    def test_run(self):
+        start_time = time.perf_counter()
+        now = datetime.datetime.now() 
+
+        global param_history
+        global cost_history
+        global iter_history
+        global y_pred
+        global y_pred_history
+
+        cost_history = []
+        min_cost = None
+        optimized_parms = None
+        vqc_constraint = None
+        initial_cost: float = None
+
+        init_param = self.sp_params
+        
+        #for debug
+        print(f"init_param {init_param}")
+
+        initial_cost = self.loss_func(init_param)
+        cost_history.append(initial_cost)
+
+        end_time = time.perf_counter()
+
+        #record to database
+        #job = JobFactory(self.config).create(
+        #    now, start_time, end_time, cost_history, param_history, iter_history, self.y_train, y_pred_history, self.fixed_random_params,
+        #)
+        #self.record_database(
+        #    job,
+         #   self.dbout_import,
+         #   self.dbout_id,
+         #   self.dbout_dataset,
+         #   self.dbout_table,
+        #)
+
+        #蛇足なのでそのうちmainと合わせて消したいかも？
+        min_cost = cost_history[-1]
+        optimized_param = param_history[-1]
+
+        vqc_result: Dict = {
+            "initial_cost": initial_cost,
+            "min_cost": min_cost,
+            "optimized_param": optimized_param
+        }
+        
+        
+        return vqc_result
+
 
     def debug(self):
   

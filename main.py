@@ -58,6 +58,8 @@ def initialize_vqc() -> None:
             vqc_output = vqc_instance.run_vqc()
         elif runmode == "debug":
             vqc_output = vqc_instance.debug()
+        elif runmode == "test":
+            vqc_output = vqc_instance.test_run()
         each_end_time = time.time()
 
         each_run_time = each_end_time - each_start_time
